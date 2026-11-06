@@ -1,6 +1,7 @@
 {
   "name": "codebridge",
   "version": "2.2.1",
+
   "private": true,
   "packageManager": "pnpm@12.16.1",
   "scripts": {
