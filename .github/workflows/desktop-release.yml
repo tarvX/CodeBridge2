@@ -140,6 +140,38 @@ jobs:
           python ../../scripts/sync_version.py
           python -m pip install --upgrade pip pyinstaller
           python -m pip install .
+          python ../../scripts/sync_version.py
+          # CODEBRIDGE_VERSION_PREBUILD_CHECK
+          python - <<'PY'
+          import importlib
+          import json
+          import sys
+          from pathlib import Path
+
+          # Force Python to load the project source, not an installed copy.
+          sys.path.insert(0, str(Path("src").resolve()))
+
+          package = json.loads(
+              Path("../../package.json").read_text(encoding="utf-8")
+          )
+          expected = package["version"]
+
+          version_module = importlib.import_module("codebridge._version")
+
+          actual = version_module.__version__
+          module_path = Path(version_module.__file__).resolve()
+
+          print(f"Expected version: {expected}")
+          print(f"Actual version:   {actual}")
+          print(f"Version module:   {module_path}")
+
+          if actual != expected:
+              raise SystemExit(
+                  f"Version mismatch: expected {expected}, got {actual}"
+              )
+
+          print("Version metadata is ready for PyInstaller.")
+          PY
           pyinstaller --onefile --clean --name codebridge --paths src \
             --hidden-import codebridge._version packaging/entry.py
 
